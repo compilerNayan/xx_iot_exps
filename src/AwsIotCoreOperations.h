@@ -25,6 +25,7 @@ class AwsIotCoreOperations : public IAwsIotCoreOperations {
     Private StdString subscribeTopic;
 
     Private Bool configured = false;
+    Private Bool wasConnected = false;
     Private StdMap<StdString, StdVector<StdString>> bufferedMessages;
     Private StdUnorderedSet<StdString> subscribedTopics;
 
@@ -47,6 +48,10 @@ class AwsIotCoreOperations : public IAwsIotCoreOperations {
         for (UInt i = 0; i < length; ++i) {
             message += static_cast<Char>(payload[i]);
         }
+        Serial.print("[AwsIotCoreOperations] Callback topic: ");
+        Serial.print(topicName.c_str());
+        Serial.print(" payload: ");
+        Serial.println(message.c_str());
         bufferedMessages[topicName].push_back(message);
     }
 
@@ -84,12 +89,24 @@ class AwsIotCoreOperations : public IAwsIotCoreOperations {
             return false;
         }
         if (WiFi.status() != WL_CONNECTED) {
+            wasConnected = false;
             return false;
         }
         if (mqttClient.connected()) {
+            wasConnected = true;
             return true;
         }
-        return mqttClient.connect(thingName.c_str());
+        Bool connected = mqttClient.connect(thingName.c_str());
+        if (connected) {
+            // MQTT session is new; previous subscriptions are no longer guaranteed.
+            if (wasConnected == false) {
+                subscribedTopics.clear();
+            }
+            wasConnected = true;
+        } else {
+            wasConnected = false;
+        }
+        return connected;
     }
 
     Private Bool EnsureSubscribed(CStdString topicName) {
@@ -100,9 +117,13 @@ class AwsIotCoreOperations : public IAwsIotCoreOperations {
             return true;
         }
         if (mqttClient.subscribe(topicName.c_str())) {
+            Serial.print("[AwsIotCoreOperations] Subscribed to topic: ");
+            Serial.println(topicName.c_str());
             subscribedTopics.insert(topicName);
             return true;
         }
+        Serial.print("[AwsIotCoreOperations] Subscribe failed for topic: ");
+        Serial.println(topicName.c_str());
         return false;
     }
 
@@ -127,7 +148,10 @@ class AwsIotCoreOperations : public IAwsIotCoreOperations {
 
     Public Virtual StdVector<StdString> ReceiveMessages(CStdString topicName) override {
         StdVector<StdString> result;
+        Serial.print("[AwsIotCoreOperations] Receive poll for topic: ");
+        Serial.println(topicName.c_str());
         if (!EnsureSubscribed(topicName)) {
+            Serial.println("[AwsIotCoreOperations] Receive poll skipped (not subscribed/connected)");
             return result;
         }
 
@@ -135,11 +159,14 @@ class AwsIotCoreOperations : public IAwsIotCoreOperations {
 
         auto it = bufferedMessages.find(topicName);
         if (it == bufferedMessages.end()) {
+            Serial.println("[AwsIotCoreOperations] Receive poll: no messages buffered");
             return result;
         }
 
         result = it->second;
         bufferedMessages.erase(it);
+        Serial.print("[AwsIotCoreOperations] Receive poll: returning messages count = ");
+        Serial.println(static_cast<Int>(result.size()));
         return result;
     }
 };
