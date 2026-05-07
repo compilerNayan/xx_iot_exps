@@ -1,12 +1,11 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include "cloud/IAwsIotCoreOperations.h"
+#include "ArduinoFirebaseServer.h"
 
 #define WIFI_SSID "Garfield"
 #define WIFI_PASSWORD "123Madhu$$"
 
-/* @Autowired */
-IAwsIotCoreOperationsPtr awsIotCoreOperations;
+ArduinoFirebaseServer firebaseServer;
 
 unsigned long lastReceiveMs = 0;
 unsigned long lastSendMs = 0;
@@ -29,6 +28,9 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
   connectToWiFi();
+  Bool started = firebaseServer.Start();
+  Serial.print("ArduinoFirebaseServer start -> ");
+  Serial.println(started ? "OK" : "FAILED");
 }
 
 void loop() {
@@ -37,22 +39,20 @@ void loop() {
   if (now - lastReceiveMs >= 1000) {
     lastReceiveMs = now;
 
-    if (awsIotCoreOperations != nullptr) {
-      StdVector<StdString> messages = awsIotCoreOperations->ReceiveMessages();
-      for (const auto& msg : messages) {
-        Serial.print("Received: ");
-        Serial.println(msg.c_str());
-      }
+    IHttpRequestPtr request = firebaseServer.ReceiveMessage();
+    if (request != nullptr) {
+      Serial.print("Received: ");
+      Serial.println(request->GetBody().c_str());
     }
   }
 
   if (now - lastSendMs >= 5000) {
     lastSendMs = now;
 
-    if (awsIotCoreOperations != nullptr) {
-      Bool ok = awsIotCoreOperations->SendMessage("Hello");
-      Serial.print("Send -> ");
-      Serial.println(ok ? "OK" : "FAILED");
-    }
+    StdString requestId = "kkm";
+    StdString message = "Hello Nayan";
+    Bool ok = firebaseServer.SendMessage(requestId, message);
+    Serial.print("Send -> ");
+    Serial.println(ok ? "OK" : "FAILED");
   }
 }
