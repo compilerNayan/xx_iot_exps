@@ -27,10 +27,12 @@ void connectToWiFi() {
 void setup() {
   Serial.begin(115200);
   delay(1000);
+  Serial.println("[main] setup begin");
   connectToWiFi();
   Bool started = firebaseServer.Start();
   Serial.print("ArduinoFirebaseServer start -> ");
   Serial.println(started ? "OK" : "FAILED");
+  Serial.println("[main] setup complete");
 }
 
 void loop() {
@@ -38,11 +40,14 @@ void loop() {
 
   if (now - lastReceiveMs >= 1000) {
     lastReceiveMs = now;
+    Serial.println("[main] 1s poll -> ReceiveMessage()");
 
     IHttpRequestPtr request = firebaseServer.ReceiveMessage();
     if (request != nullptr) {
       Serial.print("Received: ");
       Serial.println(request->GetBody().c_str());
+    } else {
+      Serial.println("[main] ReceiveMessage() returned nullptr");
     }
   }
 
@@ -51,6 +56,10 @@ void loop() {
 
     StdString requestId = "kkm";
     StdString message = "Hello Nayan";
+    Serial.print("[main] 5s publish trigger requestId=");
+    Serial.print(requestId.c_str());
+    Serial.print(" message=");
+    Serial.println(message.c_str());
     Bool ok = firebaseServer.SendMessage(requestId, message);
     Serial.print("Send -> ");
     Serial.println(ok ? "OK" : "FAILED");
