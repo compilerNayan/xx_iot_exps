@@ -10,6 +10,14 @@
 /* @Autowired */
 IAwsIotCoreConfigProviderPtr awsConfigProvider;
 
+StdString awsEndpoint;
+StdString awsThingName;
+StdString awsCaCert;
+StdString awsDeviceCert;
+StdString awsPrivateKey;
+StdString awsPublishTopic;
+StdString awsSubscribeTopic;
+
 WiFiClientSecure secureClient;
 PubSubClient mqttClient(secureClient);
 
@@ -49,12 +57,12 @@ bool connectToAwsIot() {
 
   Serial.print("Connecting to AWS IoT");
   while (!mqttClient.connected()) {
-    if (mqttClient.connect(awsConfigProvider->GetThingName().c_str())) {
+    if (mqttClient.connect(awsThingName.c_str())) {
       Serial.println();
       Serial.println("Connected to AWS IoT");
-      if (mqttClient.subscribe(awsConfigProvider->GetSubscribeTopic().c_str())) {
+      if (mqttClient.subscribe(awsSubscribeTopic.c_str())) {
         Serial.print("Subscribed to: ");
-        Serial.println(awsConfigProvider->GetSubscribeTopic().c_str());
+        Serial.println(awsSubscribeTopic.c_str());
       } else {
         Serial.println("Subscribe failed");
       }
@@ -72,13 +80,21 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
+  awsEndpoint = awsConfigProvider->GetEndpoint();
+  awsThingName = awsConfigProvider->GetThingName();
+  awsCaCert = awsConfigProvider->GetCaCert();
+  awsDeviceCert = awsConfigProvider->GetDeviceCert();
+  awsPrivateKey = awsConfigProvider->GetPrivateKey();
+  awsPublishTopic = awsConfigProvider->GetPublishTopic();
+  awsSubscribeTopic = awsConfigProvider->GetSubscribeTopic();
+
   connectToWiFi();
 
-  secureClient.setCACert(awsConfigProvider->GetCaCert().c_str());
-  secureClient.setCertificate(awsConfigProvider->GetDeviceCert().c_str());
-  secureClient.setPrivateKey(awsConfigProvider->GetPrivateKey().c_str());
+  secureClient.setCACert(awsCaCert.c_str());
+  secureClient.setCertificate(awsDeviceCert.c_str());
+  secureClient.setPrivateKey(awsPrivateKey.c_str());
 
-  mqttClient.setServer(awsConfigProvider->GetEndpoint().c_str(), 8883);
+  mqttClient.setServer(awsEndpoint.c_str(), 8883);
   mqttClient.setCallback(onMqttMessage);
   mqttClient.setBufferSize(1024);
 
@@ -107,9 +123,9 @@ void loop() {
     lastPublishMs = now;
     publishCounter++;
     String message = "Hello " + String(publishCounter);
-    bool ok = mqttClient.publish(awsConfigProvider->GetPublishTopic().c_str(), message.c_str());
+    bool ok = mqttClient.publish(awsPublishTopic.c_str(), message.c_str());
     Serial.print("Publish [");
-    Serial.print(awsConfigProvider->GetPublishTopic().c_str());
+    Serial.print(awsPublishTopic.c_str());
     Serial.print("]: ");
     Serial.print(message);
     Serial.print(" -> ");
