@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include "IAwsIotCoreOperations.h"
+#include "cloud/IAwsIotCoreOperations.h"
 
 #define WIFI_SSID "Garfield"
 #define WIFI_PASSWORD "123Madhu$$"
