@@ -103,7 +103,21 @@ class AwsIotCoreOperations : public IAwsIotCoreOperations {
                 subscribedTopics.clear();
             }
             wasConnected = true;
+
+            // Immediately subscribe to default topic on successful connect.
+            if (!subscribeTopic.empty()) {
+                if (mqttClient.subscribe(subscribeTopic.c_str())) {
+                    subscribedTopics.insert(subscribeTopic);
+                    Serial.print("[AwsIotCoreOperations] Connected + subscribed default topic: ");
+                    Serial.println(subscribeTopic.c_str());
+                } else {
+                    Serial.print("[AwsIotCoreOperations] Connected but default subscribe failed: ");
+                    Serial.println(subscribeTopic.c_str());
+                }
+            }
         } else {
+            Serial.print("[AwsIotCoreOperations] MQTT connect failed, state: ");
+            Serial.println(mqttClient.state());
             wasConnected = false;
         }
         return connected;
@@ -131,10 +145,16 @@ class AwsIotCoreOperations : public IAwsIotCoreOperations {
     Public Virtual ~AwsIotCoreOperations() override = default;
 
     Public Virtual Bool SendMessage(CStdString message) override {
+        if (!EnsureConfigured()) {
+            return false;
+        }
         return SendMessage(message, publishTopic);
     }
 
     Public Virtual StdVector<StdString> ReceiveMessages() override {
+        if (!EnsureConfigured()) {
+            return StdVector<StdString>();
+        }
         return ReceiveMessages(subscribeTopic);
     }
 
