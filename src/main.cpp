@@ -104,9 +104,9 @@ MwIDAQAB
 WiFiClientSecure secureClient;
 PubSubClient mqttClient(secureClient);
 
-ULong lastMqttPollMs = 0;
-ULong lastPublishMs = 0;
-UInt publishCounter = 0;
+unsigned long lastMqttPollMs = 0;
+unsigned long lastPublishMs = 0;
+unsigned int publishCounter = 0;
 
 void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   Serial.print("Incoming message on [");
@@ -185,7 +185,7 @@ void loop() {
     connectToAwsIot();
   }
 
-  ULong now = millis();
+  unsigned long now = millis();
 
   // Check incoming messages every 1 second.
   if (now - lastMqttPollMs >= 1000) {
