@@ -8,7 +8,7 @@
 #define WIFI_PASSWORD "123Madhu$$"
 
 /* @Autowired */
-IAwsCloudConfigProviderPtr awsConfigProvider;
+IAwsIotCoreConfigProviderPtr awsConfigProvider;
 
 WiFiClientSecure secureClient;
 PubSubClient mqttClient(secureClient);
