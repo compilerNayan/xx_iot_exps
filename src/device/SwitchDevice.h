@@ -96,7 +96,7 @@ class SwitchDevice : public ISwitchDevice {
         // Actual state is OFF if virtual and physical states differ
         SwitchState actualState = (virtualState == physicalState) ? SwitchState::On : SwitchState::Off;
         
-        logger->Info(Tag::Untagged, GetStateLogMessage(actualState, virtualState, physicalState, switchPin));
+        //logger->Info(Tag::Untagged, GetStateLogMessage(actualState, virtualState, physicalState, switchPin));
         
         return actualState;
     }
