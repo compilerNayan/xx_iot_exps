@@ -33,12 +33,6 @@ class PhysicalSwitchReader : public IPhysicalSwitchReader {
         Bool hasVoltage = (diff >= kVoltageThreshold);
         SwitchState state = hasVoltage ? SwitchState::On : SwitchState::Off;
 
-        if (logger != nullptr) {
-            StdString message = "Read physical state from pin " + std::to_string(pin) + ": " +
-                               (state == SwitchState::On ? "ON" : "OFF");
-            logger->Info(Tag::Untagged, message);
-        }
-
         return state;
     }
 };
