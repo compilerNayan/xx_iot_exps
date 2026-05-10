@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <iot_core/IIotCoreApp.h>
-#include "../device/IDeviceCollection.h"
+#include "device/IDeviceCollection.h"
 
 IIoTCoreAppPtr iotCoreApp;
 
