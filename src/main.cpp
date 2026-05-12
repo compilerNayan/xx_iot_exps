@@ -9,14 +9,13 @@ IIoTCoreAppPtr iotCoreApp;
 /* @Autowired */
 IDeviceCollectionPtr deviceCollection;
 
-/* @Autowired */
-IEndpointSecurityRuleManagerPtr endpointSecurityConfig;
+//IEndpointSecurityRuleManagerPtr endpointSecurityConfig;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("dsds jdeoang-un");
+  Serial.println("mmm jdeoang-un");
   iotCoreApp = Implementation<IIoTCoreApp>::type::GetInstance();
-  endpointSecurityConfig->AddRule<TestAuthFilter>("/switch/{id}", HttpMethod::GET);
+  //endpointSecurityConfig->AddRule<TestAuthFilter>("/switch/{id}", HttpMethod::GET);
   iotCoreApp->Start();
 }
 
