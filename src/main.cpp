@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <iot_core/IIotCoreApp.h>
 #include "device/IDeviceCollection.h"
-#include "auth/IEndpointSecurityConfig.h"
+#include "auth/IEndpointSecurityRuleManager.h"
 #include "HttpMethod.h"
 #include "TestAuthFilter.h"
 IIoTCoreAppPtr iotCoreApp;
@@ -10,7 +10,7 @@ IIoTCoreAppPtr iotCoreApp;
 IDeviceCollectionPtr deviceCollection;
 
 /* @Autowired */
-IEndpointSecurityConfigPtr endpointSecurityConfig;
+IEndpointSecurityRuleManagerPtr endpointSecurityConfig;
 
 void setup() {
   Serial.begin(115200);
