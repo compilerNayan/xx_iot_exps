@@ -3,6 +3,7 @@
 
 #include <StandardDefines.h>
 #include "auth/ISecurityConfig.h"
+#include "TestAuthFilter.h"
 
 /* @Configuration */
 class CustomConfig : public ISecurityConfig {
